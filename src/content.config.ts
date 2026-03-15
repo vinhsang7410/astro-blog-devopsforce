@@ -16,26 +16,33 @@ const blog = defineCollection({
 	}),
 });
 const projects = defineCollection({
+	loader: glob({ base: "./src/content/projects", pattern: "**/*.{md,mdx}" }),
 	schema: z.object({
 		title: z.string(),
 		description: z.string(),
 		github: z.string().optional(),
-		pubDate: z.date(),
+		pubDate: z.coerce.date(),
+		tags: z.array(z.string()).optional(),
 	}),
 });
 
 const labs = defineCollection({
+	loader: glob({ base: "./src/content/labs", pattern: "**/*.{md,mdx}" }),
 	schema: z.object({
 		title: z.string(),
-		pubDate: z.date(),
+		pubDate: z.coerce.date(),
 		description: z.string(),
+		tags: z.array(z.string()).optional(),
 	}),
 });
 
 const notes = defineCollection({
+	loader: glob({ base: "./src/content/notes", pattern: "**/*.{md,mdx}" }),
 	schema: z.object({
 		title: z.string(),
-		pubDate: z.date(),
+		description: z.string().optional(),
+		pubDate: z.coerce.date(),
+		tags: z.array(z.string()).optional(),
 	}),
 });
 export const collections = { blog, projects, labs, notes };

@@ -1,16 +1,18 @@
 ---
 import { getCollection } from "astro:content";
 
-const notes = await getCollection("notes");
+const notes = (await getCollection("notes")).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
 ---
 
 <h1>Notes</h1>
 
 <ul>
-  {notes.map((project) => (
+  {notes.map((note) => (
     <li>
-      <a href={`/notes/${project.slug}`}>
-        {project.data.title}
+      <a href={`/notes/${note.id}/`}>
+        {note.data.title}
       </a>
     </li>
   ))}

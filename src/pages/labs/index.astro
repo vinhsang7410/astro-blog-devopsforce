@@ -1,16 +1,18 @@
 ---
 import { getCollection } from "astro:content";
 
-const labs = await getCollection("labs");
+const labs = (await getCollection("labs")).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
 ---
 
 <h1>Labs</h1>
 
 <ul>
-  {labs.map((project) => (
+  {labs.map((lab) => (
     <li>
-      <a href={`/labs/${project.slug}`}>
-        {project.data.title}
+      <a href={`/labs/${lab.id}/`}>
+        {lab.data.title}
       </a>
     </li>
   ))}

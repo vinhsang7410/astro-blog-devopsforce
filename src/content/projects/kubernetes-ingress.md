@@ -7,4 +7,4 @@ tags: ["kubernetes"]
 
 # Kubernetes Ingress
 
-Ingress là một resource dùng để expose HTTP service.
+Ingress la mot resource dung de expose HTTP service cho cluster Kubernetes.
