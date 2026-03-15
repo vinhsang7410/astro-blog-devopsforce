@@ -15,5 +15,27 @@ const blog = defineCollection({
 		heroImage: z.string().optional(),
 	}),
 });
+const projects = defineCollection({
+	schema: z.object({
+		title: z.string(),
+		description: z.string(),
+		github: z.string().optional(),
+		pubDate: z.date(),
+	}),
+});
 
-export const collections = { blog };
+const labs = defineCollection({
+	schema: z.object({
+		title: z.string(),
+		pubDate: z.date(),
+		description: z.string(),
+	}),
+});
+
+const notes = defineCollection({
+	schema: z.object({
+		title: z.string(),
+		pubDate: z.date(),
+	}),
+});
+export const collections = { blog, projects, labs, notes };

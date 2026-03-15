@@ -1,0 +1,17 @@
+---
+import { getCollection } from "astro:content";
+
+const notes = await getCollection("notes");
+---
+
+<h1>Notes</h1>
+
+<ul>
+  {notes.map((project) => (
+    <li>
+      <a href={`/notes/${project.slug}`}>
+        {project.data.title}
+      </a>
+    </li>
+  ))}
+</ul>

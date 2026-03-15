@@ -1,0 +1,17 @@
+---
+import { getCollection } from "astro:content";
+
+const labs = await getCollection("labs");
+---
+
+<h1>Labs</h1>
+
+<ul>
+  {labs.map((project) => (
+    <li>
+      <a href={`/labs/${project.slug}`}>
+        {project.data.title}
+      </a>
+    </li>
+  ))}
+</ul>
