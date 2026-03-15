@@ -1,0 +1,251 @@
+---
+import BaseHead from "../components/BaseHead.astro";
+import Footer from "../components/Footer.astro";
+import FormattedDate from "../components/FormattedDate.astro";
+import Header from "../components/Header.astro";
+import { SITE_TITLE } from "../consts";
+import { sectionThemes, type SectionName } from "../sectionTheme";
+
+interface Props {
+	title: string;
+	description?: string;
+	pubDate: Date;
+	tags?: string[];
+	github?: string;
+	section: SectionName;
+}
+
+const { title, description, pubDate, tags = [], github, section } = Astro.props;
+const theme = sectionThemes[section];
+const pageTitle = `${title} | ${theme.label} | ${SITE_TITLE}`;
+const pageDescription = description ?? theme.description;
+---
+
+<html lang="en">
+	<head>
+		<BaseHead title={pageTitle} description={pageDescription} />
+		<style define:vars={{ accent: theme.accent, accentSoft: theme.accentSoft, surface: theme.surface, glow: theme.glow }}>
+			main {
+				width: min(1080px, calc(100% - 2rem));
+				max-width: none;
+				padding: 2.75rem 0 4rem;
+			}
+			.entry-shell {
+				display: grid;
+				gap: 2rem;
+			}
+			.entry-hero {
+				position: relative;
+				overflow: hidden;
+				padding: 2rem;
+				border: 1px solid rgba(var(--gray), 0.18);
+				border-radius: 28px;
+				background:
+					var(--glow),
+					var(--surface);
+				box-shadow: 0 22px 70px rgba(var(--black), 0.12);
+			}
+			.entry-hero::after {
+				content: "";
+				position: absolute;
+				inset: auto -4rem -4rem auto;
+				width: 12rem;
+				height: 12rem;
+				border-radius: 999px;
+				background: rgba(var(--accent), 0.12);
+				filter: blur(8px);
+			}
+			.hero-top {
+				position: relative;
+				z-index: 1;
+				display: flex;
+				flex-wrap: wrap;
+				align-items: center;
+				justify-content: space-between;
+				gap: 0.75rem;
+				margin-bottom: 1.5rem;
+			}
+			.eyebrow,
+			.back-link,
+			.hero-action {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.45rem;
+				padding: 0.5rem 0.9rem;
+				border-radius: 999px;
+				font-size: 0.85rem;
+				font-weight: 700;
+				letter-spacing: 0.06em;
+				text-transform: uppercase;
+				text-decoration: none;
+			}
+			.eyebrow {
+				color: rgb(var(--black));
+				background: rgba(var(--accent), 0.14);
+			}
+			.back-link,
+			.hero-action {
+				color: rgb(var(--black));
+				background: rgba(255, 255, 255, 0.82);
+				border: 1px solid rgba(var(--gray), 0.16);
+			}
+			.hero-copy {
+				position: relative;
+				z-index: 1;
+				max-width: 44rem;
+			}
+			.hero-copy h1 {
+				margin-bottom: 0.85rem;
+				font-size: clamp(2.6rem, 6vw, 4.5rem);
+				letter-spacing: -0.05em;
+			}
+			.hero-copy p {
+				margin: 0;
+				max-width: 40rem;
+				font-size: 1.05rem;
+				color: rgb(var(--gray-dark));
+			}
+			.meta-grid {
+				position: relative;
+				z-index: 1;
+				display: grid;
+				grid-template-columns: repeat(3, minmax(0, 1fr));
+				gap: 1rem;
+				margin-top: 2rem;
+			}
+			.meta-card {
+				padding: 1rem 1.1rem;
+				border-radius: 20px;
+				background: rgba(255, 255, 255, 0.72);
+				border: 1px solid rgba(var(--gray), 0.14);
+				backdrop-filter: blur(10px);
+			}
+			.meta-card span {
+				display: block;
+				margin-bottom: 0.25rem;
+				font-size: 0.78rem;
+				font-weight: 700;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+				color: rgb(var(--gray));
+			}
+			.meta-card strong,
+			.meta-card a {
+				color: rgb(var(--black));
+				font-size: 1rem;
+			}
+			.tag-list {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.6rem;
+				margin: 0;
+				padding: 0;
+				list-style: none;
+			}
+			.tag-list li {
+				padding: 0.45rem 0.8rem;
+				border-radius: 999px;
+				background: rgb(var(--accentSoft));
+				color: rgb(var(--black));
+				font-size: 0.88rem;
+				font-weight: 700;
+			}
+			.entry-body {
+				padding: 2rem;
+				border-radius: 28px;
+				background: rgba(255, 255, 255, 0.92);
+				border: 1px solid rgba(var(--gray), 0.12);
+				box-shadow: 0 18px 48px rgba(var(--black), 0.08);
+			}
+			.prose {
+				width: min(760px, 100%);
+				max-width: 100%;
+				margin: 0 auto;
+				padding: 0;
+			}
+			.prose :global(h2),
+			.prose :global(h3) {
+				margin-top: 2.2rem;
+			}
+			.prose :global(pre) {
+				background: rgb(var(--black));
+				color: white;
+				box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+			}
+			.prose :global(blockquote) {
+				border-left-color: rgb(var(--accent));
+				background: rgba(var(--accent), 0.06);
+				padding: 1rem 1.25rem;
+				border-radius: 0 18px 18px 0;
+			}
+			@media (max-width: 900px) {
+				.meta-grid {
+					grid-template-columns: 1fr;
+				}
+			}
+			@media (max-width: 720px) {
+				main {
+					width: min(100%, calc(100% - 1rem));
+					padding-top: 1.25rem;
+				}
+				.entry-hero,
+				.entry-body {
+					padding: 1.25rem;
+					border-radius: 22px;
+				}
+				.hero-copy h1 {
+					font-size: 2.3rem;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<div class="entry-shell">
+				<section class="entry-hero">
+					<div class="hero-top">
+						<div class="eyebrow">{theme.eyebrow}</div>
+						<div class="hero-links">
+							<a class="back-link" href={`/${section}/`}>Back to {theme.label}</a>
+							{github && (
+								<a class="hero-action" href={github} target="_blank" rel="noreferrer">GitHub</a>
+							)}
+						</div>
+					</div>
+					<div class="hero-copy">
+						<h1>{title}</h1>
+						<p>{pageDescription}</p>
+					</div>
+					<div class="meta-grid">
+						<div class="meta-card">
+							<span>Published</span>
+							<strong><FormattedDate date={pubDate} /></strong>
+						</div>
+						<div class="meta-card">
+							<span>Section</span>
+							<strong>{theme.label}</strong>
+						</div>
+						<div class="meta-card">
+							<span>Tags</span>
+							{tags.length > 0 ? (
+								<ul class="tag-list">
+									{tags.map((tag) => <li>{tag}</li>)}
+								</ul>
+							) : (
+								<strong>No tags yet</strong>
+							)}
+						</div>
+					</div>
+				</section>
+
+				<article class="entry-body">
+					<div class="prose">
+						<slot />
+					</div>
+				</article>
+			</div>
+		</main>
+		<Footer />
+	</body>
+</html>

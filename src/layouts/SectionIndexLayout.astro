@@ -1,0 +1,288 @@
+---
+import BaseHead from "../components/BaseHead.astro";
+import Footer from "../components/Footer.astro";
+import FormattedDate from "../components/FormattedDate.astro";
+import Header from "../components/Header.astro";
+import { SITE_TITLE } from "../consts";
+import { sectionThemes, type SectionName } from "../sectionTheme";
+
+interface Item {
+	id: string;
+	title: string;
+	description?: string;
+	pubDate: Date;
+	tags?: string[];
+	github?: string;
+}
+
+interface Props {
+	title: string;
+	description: string;
+	section: SectionName;
+	items: Item[];
+}
+
+const { title, description, section, items } = Astro.props;
+const theme = sectionThemes[section];
+const pageTitle = `${title} | ${SITE_TITLE}`;
+---
+
+<html lang="en">
+	<head>
+		<BaseHead title={pageTitle} description={description} />
+		<style define:vars={{ accent: theme.accent, accentSoft: theme.accentSoft, surface: theme.surface, glow: theme.glow }}>
+			main {
+				width: min(1120px, calc(100% - 2rem));
+				max-width: none;
+				padding: 2.5rem 0 4rem;
+			}
+			.collection-shell {
+				display: grid;
+				gap: 2rem;
+			}
+			.collection-hero {
+				position: relative;
+				overflow: hidden;
+				padding: 2rem;
+				border-radius: 30px;
+				background:
+					var(--glow),
+					var(--surface);
+				border: 1px solid rgba(var(--gray), 0.16);
+				box-shadow: 0 22px 72px rgba(var(--black), 0.12);
+			}
+			.collection-hero::before {
+				content: "";
+				position: absolute;
+				inset: 1.25rem 1.25rem auto auto;
+				width: 9rem;
+				height: 9rem;
+				border-radius: 24px;
+				background: rgba(var(--accent), 0.08);
+				transform: rotate(14deg);
+			}
+			.hero-eyebrow {
+				position: relative;
+				z-index: 1;
+				display: inline-flex;
+				padding: 0.5rem 0.9rem;
+				border-radius: 999px;
+				background: rgba(var(--accent), 0.16);
+				font-size: 0.82rem;
+				font-weight: 700;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+			}
+			.hero-grid {
+				position: relative;
+				z-index: 1;
+				display: grid;
+				grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+				gap: 2rem;
+				align-items: end;
+				margin-top: 1.2rem;
+			}
+			.hero-copy h1 {
+				margin-bottom: 0.85rem;
+				font-size: clamp(2.8rem, 7vw, 5rem);
+				letter-spacing: -0.06em;
+			}
+			.hero-copy p {
+				margin: 0;
+				max-width: 42rem;
+				font-size: 1.06rem;
+			}
+			.hero-stats {
+				display: grid;
+				gap: 1rem;
+			}
+			.stat-card {
+				padding: 1rem 1.1rem;
+				border-radius: 22px;
+				background: rgba(255, 255, 255, 0.78);
+				border: 1px solid rgba(var(--gray), 0.14);
+				backdrop-filter: blur(8px);
+			}
+			.stat-card span {
+				display: block;
+				font-size: 0.76rem;
+				font-weight: 700;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+				color: rgb(var(--gray));
+			}
+			.stat-card strong {
+				display: block;
+				margin-top: 0.25rem;
+				font-size: 1.6rem;
+				color: rgb(var(--black));
+			}
+			.collection-grid {
+				display: grid;
+				grid-template-columns: repeat(12, minmax(0, 1fr));
+				gap: 1.25rem;
+			}
+			.collection-card {
+				grid-column: span 6;
+				display: flex;
+				flex-direction: column;
+				gap: 1rem;
+				padding: 1.35rem;
+				border-radius: 24px;
+				background: rgba(255, 255, 255, 0.92);
+				border: 1px solid rgba(var(--gray), 0.14);
+				box-shadow: 0 18px 44px rgba(var(--black), 0.08);
+				text-decoration: none;
+				color: inherit;
+				transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+			}
+			.collection-card:hover {
+				transform: translateY(-4px);
+				border-color: rgba(var(--accent), 0.35);
+				box-shadow: 0 24px 52px rgba(var(--black), 0.12);
+			}
+			.card-top,
+			.card-bottom {
+				display: flex;
+				flex-wrap: wrap;
+				align-items: center;
+				justify-content: space-between;
+				gap: 0.75rem;
+			}
+			.card-label,
+			.card-link {
+				display: inline-flex;
+				align-items: center;
+				padding: 0.45rem 0.8rem;
+				border-radius: 999px;
+				font-size: 0.78rem;
+				font-weight: 700;
+				letter-spacing: 0.06em;
+				text-transform: uppercase;
+			}
+			.card-label {
+				background: rgb(var(--accentSoft));
+				color: rgb(var(--black));
+			}
+			.card-link {
+				background: rgba(var(--accent), 0.1);
+				color: rgb(var(--black));
+			}
+			.card-date {
+				font-size: 0.92rem;
+				color: rgb(var(--gray));
+			}
+			.collection-card h2 {
+				margin: 0;
+				font-size: 1.8rem;
+				letter-spacing: -0.04em;
+			}
+			.collection-card p {
+				margin: 0;
+				color: rgb(var(--gray-dark));
+			}
+			.tag-list {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.55rem;
+				margin: 0;
+				padding: 0;
+				list-style: none;
+			}
+			.tag-list li {
+				padding: 0.4rem 0.7rem;
+				border-radius: 999px;
+				background: rgba(var(--gray-light), 0.72);
+				font-size: 0.82rem;
+				font-weight: 700;
+				color: rgb(var(--gray-dark));
+			}
+			.empty-state {
+				padding: 2rem;
+				border-radius: 24px;
+				border: 1px dashed rgba(var(--gray), 0.3);
+				background: rgba(255, 255, 255, 0.7);
+				text-align: center;
+			}
+			@media (max-width: 900px) {
+				.hero-grid {
+					grid-template-columns: 1fr;
+				}
+				.collection-card {
+					grid-column: span 12;
+				}
+			}
+			@media (max-width: 720px) {
+				main {
+					width: min(100%, calc(100% - 1rem));
+					padding-top: 1.25rem;
+				}
+				.collection-hero,
+				.collection-card,
+				.empty-state {
+					padding: 1.25rem;
+					border-radius: 22px;
+				}
+				.hero-copy h1 {
+					font-size: 2.4rem;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<div class="collection-shell">
+				<section class="collection-hero">
+					<div class="hero-eyebrow">{theme.eyebrow}</div>
+					<div class="hero-grid">
+						<div class="hero-copy">
+							<h1>{title}</h1>
+							<p>{description}</p>
+						</div>
+						<div class="hero-stats">
+							<div class="stat-card">
+								<span>Entries</span>
+								<strong>{items.length}</strong>
+							</div>
+							<div class="stat-card">
+								<span>Collection</span>
+								<strong>{theme.label}</strong>
+							</div>
+						</div>
+					</div>
+				</section>
+
+				{items.length > 0 ? (
+					<section class="collection-grid">
+						{items.map((item) => (
+							<a class="collection-card" href={`/${section}/${item.id}/`}>
+								<div class="card-top">
+									<span class="card-label">{theme.cardLabel}</span>
+									<span class="card-date"><FormattedDate date={item.pubDate} /></span>
+								</div>
+								<h2>{item.title}</h2>
+								<p>{item.description ?? theme.description}</p>
+								{item.tags && item.tags.length > 0 && (
+									<ul class="tag-list">
+										{item.tags.map((tag) => <li>{tag}</li>)}
+									</ul>
+								)}
+								<div class="card-bottom">
+									<span class="card-link">Open {theme.singular}</span>
+									{item.github && <span class="card-date">GitHub linked</span>}
+								</div>
+							</a>
+						))}
+					</section>
+				) : (
+					<div class="empty-state">
+						<h2>No entries yet</h2>
+						<p>Add a Markdown file under <code>src/content/{section}</code> to populate this section.</p>
+					</div>
+				)}
+			</div>
+		</main>
+		<Footer />
+	</body>
+</html>

@@ -1,19 +1,18 @@
 ---
 import { getCollection } from "astro:content";
+import SectionIndexLayout from "../../layouts/SectionIndexLayout.astro";
 
 const projects = (await getCollection("projects")).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
 ---
 
-<h1>Projects</h1>
-
-<ul>
-  {projects.map((project) => (
-    <li>
-      <a href={`/projects/${project.id}/`}>
-        {project.data.title}
-      </a>
-    </li>
-  ))}
-</ul>
+<SectionIndexLayout
+	section="projects"
+	title="Projects"
+	description="Build logs and implementation stories for infrastructure work, edge deployments, and platform experiments."
+	items={projects.map((project) => ({
+		id: project.id,
+		...project.data,
+	}))}
+/>

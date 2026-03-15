@@ -63,8 +63,15 @@ import { SITE_TITLE } from '../consts';
 	}
 	nav {
 		display: flex;
+		flex-wrap: wrap;
 		align-items: center;
 		justify-content: space-between;
+		gap: 0.75rem;
+	}
+	.internal-links {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
 	}
 	nav a {
 		padding: 1em 0.5em;
@@ -81,6 +88,12 @@ import { SITE_TITLE } from '../consts';
 		display: flex;
 	}
 	@media (max-width: 720px) {
+		nav {
+			justify-content: center;
+		}
+		.internal-links {
+			width: 100%;
+		}
 		.social-links {
 			display: none;
 		}

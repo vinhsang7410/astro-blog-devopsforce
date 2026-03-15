@@ -1,19 +1,18 @@
 ---
 import { getCollection } from "astro:content";
+import SectionIndexLayout from "../../layouts/SectionIndexLayout.astro";
 
 const labs = (await getCollection("labs")).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
 ---
 
-<h1>Labs</h1>
-
-<ul>
-  {labs.map((lab) => (
-    <li>
-      <a href={`/labs/${lab.id}/`}>
-        {lab.data.title}
-      </a>
-    </li>
-  ))}
-</ul>
+<SectionIndexLayout
+	section="labs"
+	title="Labs"
+	description="Experiments, cluster drills, and test environments where the sharp edges usually show up first."
+	items={labs.map((lab) => ({
+		id: lab.id,
+		...lab.data,
+	}))}
+/>

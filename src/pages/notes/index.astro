@@ -1,19 +1,18 @@
 ---
 import { getCollection } from "astro:content";
+import SectionIndexLayout from "../../layouts/SectionIndexLayout.astro";
 
 const notes = (await getCollection("notes")).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
 ---
 
-<h1>Notes</h1>
-
-<ul>
-  {notes.map((note) => (
-    <li>
-      <a href={`/notes/${note.id}/`}>
-        {note.data.title}
-      </a>
-    </li>
-  ))}
-</ul>
+<SectionIndexLayout
+	section="notes"
+	title="Notes"
+	description="Short-form references for commands, patterns, and small things worth remembering during real work."
+	items={notes.map((note) => ({
+		id: note.id,
+		...note.data,
+	}))}
+/>
