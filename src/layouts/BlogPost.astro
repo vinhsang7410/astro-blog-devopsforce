@@ -4,6 +4,7 @@ import BaseHead from '../components/BaseHead.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import FormattedDate from '../components/FormattedDate.astro';
+import TableOfContents from '../components/TableOfContents.astro';
 
 type Heading = {
 	depth: number;
@@ -16,7 +17,6 @@ type Props = CollectionEntry<'blog'>['data'] & {
 };
 
 const { title, description, pubDate, updatedDate, heroImage, headings = [] } = Astro.props;
-const tocHeadings = headings.filter((heading) => heading.depth >= 2 && heading.depth <= 4);
 ---
 
 <html lang="en">
@@ -24,18 +24,20 @@ const tocHeadings = headings.filter((heading) => heading.depth >= 2 && heading.d
 		<BaseHead title={title} description={description} />
 		<style>
 			main {
-				width: min(75vw, 1320px);
+				width: min(86vw, 1480px);
 				max-width: calc(100% - 2rem);
 				margin: auto;
 			}
 			.post-shell {
 				display: grid;
-				grid-template-columns: minmax(0, 1fr) 300px;
-				gap: 2rem;
+				grid-template-columns: minmax(0, 980px) minmax(240px, 280px);
+				justify-content: space-between;
+				gap: 2.25rem;
 				align-items: start;
 			}
 			.post-main {
 				min-width: 0;
+				max-width: 980px;
 			}
 			.hero-image {
 				width: 100%;
@@ -47,55 +49,17 @@ const tocHeadings = headings.filter((heading) => heading.depth >= 2 && heading.d
 				box-shadow: var(--box-shadow);
 			}
 			.prose {
-				width: min(75vw, 980px);
+				width: 100%;
 				max-width: 100%;
 				margin: 0;
 				padding: 1em;
 				color: rgb(var(--gray-dark));
 			}
-			.toc {
-				position: sticky;
-				top: 1.5rem;
-				padding: 1.1rem;
-				border-radius: 18px;
-				border: 1px solid rgba(var(--gray), 0.18);
-				background: rgba(255, 255, 255, 0.82);
-				box-shadow: 0 16px 40px rgba(var(--black), 0.08);
-				backdrop-filter: blur(10px);
-			}
-			.toc h3 {
-				margin-bottom: 0.9rem;
-				font-size: 1rem;
-				letter-spacing: 0.06em;
-				text-transform: uppercase;
-			}
-			.toc ul {
-				list-style: none;
-				margin: 0;
-				padding: 0;
-				display: grid;
-				gap: 0.45rem;
-			}
-			.toc a {
-				display: block;
-				padding: 0.45rem 0.65rem;
-				border-radius: 12px;
-				color: rgb(var(--gray-dark));
-				text-decoration: none;
-				background: rgba(var(--gray-light), 0.55);
-				font-size: 0.94rem;
-			}
-			.toc a:hover {
-				color: rgb(var(--black));
-				background: rgba(var(--gray-light), 0.95);
-			}
-			.toc .depth-3 a {
-				padding-left: 1.2rem;
-				font-size: 0.88rem;
-			}
-			.toc .depth-4 a {
-				padding-left: 1.75rem;
-				font-size: 0.84rem;
+			.toc-wrap {
+				width: 100%;
+				display: flex;
+				justify-content: flex-end;
+				align-self: start;
 			}
 			.title {
 				margin-bottom: 1em;
@@ -117,8 +81,7 @@ const tocHeadings = headings.filter((heading) => heading.depth >= 2 && heading.d
 				.post-shell {
 					grid-template-columns: 1fr;
 				}
-				.toc {
-					position: static;
+				.toc-wrap {
 					order: -1;
 				}
 			}
@@ -160,20 +123,9 @@ const tocHeadings = headings.filter((heading) => heading.depth >= 2 && heading.d
 						<slot />
 					</div>
 				</article>
-				{
-					tocHeadings.length > 0 && (
-						<aside class="toc">
-							<h3>On This Page</h3>
-							<ul>
-								{tocHeadings.map((heading) => (
-									<li class={`depth-${heading.depth}`}>
-										<a href={`#${heading.slug}`}>{heading.text}</a>
-									</li>
-								))}
-							</ul>
-						</aside>
-					)
-				}
+				<div class="toc-wrap">
+					<TableOfContents headings={headings} />
+				</div>
 			</div>
 		</main>
 		<Footer />

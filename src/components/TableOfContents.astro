@@ -1,0 +1,127 @@
+---
+interface Heading {
+	depth: number;
+	slug: string;
+	text: string;
+}
+
+interface TocItem extends Heading {
+	level: number;
+}
+
+interface Props {
+	headings: Heading[];
+}
+
+const { headings } = Astro.props;
+const tocItems: TocItem[] = headings
+	.filter((heading) => heading.depth >= 2 && heading.depth <= 4)
+	.map((heading) => ({
+		...heading,
+		level: heading.depth - 2,
+	}));
+---
+
+{
+	tocItems.length > 0 && (
+		<aside class="toc">
+			<h3>On This Page</h3>
+			<ul>
+				{tocItems.map((heading) => (
+					<li class={`level-${heading.level}`}>
+						<a href={`#${heading.slug}`}>
+							<span class="branch" aria-hidden="true">
+								{heading.level === 0 ? "*" : heading.level === 1 ? "|-" : "`-"}
+							</span>
+							<span>{heading.text}</span>
+						</a>
+					</li>
+				))}
+			</ul>
+		</aside>
+	)
+}
+
+<style>
+	.toc {
+		position: sticky;
+		top: 1.5rem;
+		width: 100%;
+		max-width: 280px;
+		padding: 1rem 1rem 1.1rem;
+		border-radius: 18px;
+		border: 1px solid rgba(var(--gray), 0.16);
+		background: rgba(255, 255, 255, 0.9);
+		box-shadow: 0 16px 40px rgba(var(--black), 0.08);
+		backdrop-filter: blur(10px);
+	}
+	.toc h3 {
+		margin-bottom: 0.85rem;
+		font-size: 0.95rem;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+	}
+	.toc ul {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: grid;
+		gap: 0.3rem;
+	}
+	.toc li {
+		position: relative;
+	}
+	.toc a {
+		display: grid;
+		grid-template-columns: 1.2rem minmax(0, 1fr);
+		gap: 0.45rem;
+		align-items: start;
+		padding: 0.45rem 0.6rem;
+		border-radius: 12px;
+		color: rgb(var(--gray-dark));
+		text-decoration: none;
+		font-size: 0.93rem;
+		line-height: 1.35;
+		background: rgba(var(--gray-light), 0.45);
+	}
+	.toc a:hover {
+		color: rgb(var(--black));
+		background: rgba(var(--gray-light), 0.95);
+	}
+	.branch {
+		display: inline-flex;
+		justify-content: center;
+		color: rgb(var(--gray));
+		font-weight: 700;
+	}
+	.level-1 {
+		padding-left: 0.9rem;
+	}
+	.level-1::before,
+	.level-2::before {
+		content: "";
+		position: absolute;
+		left: 0.52rem;
+		top: 0.25rem;
+		bottom: 0.25rem;
+		border-left: 1px solid rgba(var(--gray), 0.28);
+	}
+	.level-2 {
+		padding-left: 1.8rem;
+	}
+	.level-2::before {
+		left: 1.42rem;
+	}
+	.level-1 a {
+		font-size: 0.89rem;
+	}
+	.level-2 a {
+		font-size: 0.85rem;
+	}
+	@media (max-width: 1080px) {
+		.toc {
+			position: static;
+			max-width: none;
+		}
+	}
+</style>

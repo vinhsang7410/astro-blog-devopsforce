@@ -1,5 +1,8 @@
 ---
-import Layout from '../layouts/BlogPost.astro';
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { SITE_TITLE } from '../consts';
 
 const careerStart = new Date('2024-03-01T00:00:00+07:00');
 const today = new Date();
@@ -20,31 +23,184 @@ function formatDuration(from: Date, to: Date) {
 }
 
 const devopsExperience = formatDuration(careerStart, today);
+const pageTitle = `About | ${SITE_TITLE}`;
+const pageDescription =
+	'Welcome to the personal blog of Tran Phan Vinh Sang, a DevOps engineer based in Vietnam.';
 ---
 
-<Layout
-	title="About Me"
-	description="A short introduction to Tran Phan Vinh Sang and the purpose behind this personal DevOps blog."
-	pubDate={new Date('2026-03-16')}
-	heroImage="/blog-placeholder-about.jpg"
->
-	<p>
-		Welcome to my blog. My name is <strong>Tran Phan Vinh Sang</strong>, an ambitious DevOps engineer
-		currently living and working in Vietnam.
-	</p>
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={pageTitle} description={pageDescription} image="/blog-placeholder-about.jpg" />
+		<style>
+			main {
+				width: min(84vw, 1280px);
+				max-width: calc(100% - 2rem);
+				padding: 2.75rem 0 4rem;
+			}
+			.about-shell {
+				display: grid;
+				grid-template-columns: minmax(0, 1.4fr) minmax(260px, 360px);
+				gap: 2rem;
+				align-items: start;
+			}
+			.about-hero,
+			.about-panel,
+			.about-story {
+				border-radius: 28px;
+				border: 1px solid rgba(var(--gray), 0.16);
+				background: rgba(255, 255, 255, 0.92);
+				box-shadow: 0 20px 50px rgba(var(--black), 0.08);
+			}
+			.about-main {
+				display: grid;
+				gap: 1.5rem;
+			}
+			.about-hero {
+				position: relative;
+				overflow: hidden;
+				padding: 2rem;
+				background:
+					radial-gradient(circle at top left, rgba(35, 55, 255, 0.18), transparent 50%),
+					linear-gradient(140deg, rgba(255, 255, 255, 0.98), rgba(229, 233, 240, 0.72));
+			}
+			.about-hero::after {
+				content: "";
+				position: absolute;
+				right: -2rem;
+				top: -2rem;
+				width: 10rem;
+				height: 10rem;
+				border-radius: 50%;
+				background: rgba(35, 55, 255, 0.1);
+				filter: blur(4px);
+			}
+			.eyebrow {
+				display: inline-flex;
+				padding: 0.5rem 0.85rem;
+				border-radius: 999px;
+				background: rgba(35, 55, 255, 0.1);
+				font-size: 0.82rem;
+				font-weight: 700;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+			}
+			.about-hero h1 {
+				margin: 1rem 0 0.75rem;
+				font-size: clamp(2.8rem, 7vw, 4.8rem);
+				letter-spacing: -0.06em;
+			}
+			.about-hero p {
+				max-width: 44rem;
+				margin: 0;
+				font-size: 1.08rem;
+			}
+			.about-story {
+				padding: 2rem;
+			}
+			.about-story h2 {
+				margin-bottom: 1rem;
+				font-size: 1.5rem;
+			}
+			.about-story p:last-child {
+				margin-bottom: 0;
+			}
+			.about-panel {
+				position: sticky;
+				top: 1.5rem;
+				padding: 1.5rem;
+				display: grid;
+				gap: 1rem;
+			}
+			.panel-card {
+				padding: 1rem 1.1rem;
+				border-radius: 20px;
+				background: rgba(var(--gray-light), 0.42);
+			}
+			.panel-card span {
+				display: block;
+				margin-bottom: 0.3rem;
+				font-size: 0.78rem;
+				font-weight: 700;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+				color: rgb(var(--gray));
+			}
+			.panel-card strong {
+				color: rgb(var(--black));
+				font-size: 1rem;
+			}
+			@media (max-width: 1080px) {
+				.about-shell {
+					grid-template-columns: 1fr;
+				}
+				.about-panel {
+					position: static;
+				}
+			}
+			@media (max-width: 720px) {
+				main {
+					width: min(100%, calc(100% - 1rem));
+					padding-top: 1.25rem;
+				}
+				.about-hero,
+				.about-story,
+				.about-panel {
+					padding: 1.25rem;
+					border-radius: 22px;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<div class="about-shell">
+				<section class="about-main">
+					<div class="about-hero">
+						<div class="eyebrow">Personal Blog</div>
+						<h1>Tran Phan Vinh Sang</h1>
+						<p>
+							Welcome to my blog. I am an ambitious DevOps engineer currently living and working in
+							Vietnam.
+						</p>
+					</div>
 
-	<p>
-		My current experience is in <strong>DevOps</strong>, with <strong>{devopsExperience}</strong> of
-		hands-on work counted from March 2024 up to now. I graduated from
-		<strong> Ho Chi Minh City University of Industry and Trade (HUIT)</strong>.
-	</p>
+					<article class="about-story">
+						<h2>Why I built this blog</h2>
+						<p>
+							On this blog, I introduce the things I know, the personal projects I build, and the
+							practical lessons I learn while working. My goal is to share useful knowledge for free
+							with anyone who may need it.
+						</p>
+						<p>
+							I want this space to be a place where experiments, real-world notes, and personal DevOps
+							work can be documented clearly and honestly. I hope every visitor has the best possible
+							experience while exploring it.
+						</p>
+					</article>
+				</section>
 
-	<p>
-		On this blog, I share what I know, the personal projects I build, and the lessons I learn along
-		the way. My goal is simple: to make useful knowledge available for free to anyone who may need it.
-	</p>
-
-	<p>
-		I hope you have the best possible experience while exploring my blog. Thank you for stopping by.
-	</p>
-</Layout>
+				<aside class="about-panel">
+					<div class="panel-card">
+						<span>Current role</span>
+						<strong>DevOps Engineer</strong>
+					</div>
+					<div class="panel-card">
+						<span>Experience</span>
+						<strong>{devopsExperience} since March 2024</strong>
+					</div>
+					<div class="panel-card">
+						<span>Education</span>
+						<strong>Ho Chi Minh City University of Industry and Trade (HUIT)</strong>
+					</div>
+					<div class="panel-card">
+						<span>Location</span>
+						<strong>Vietnam</strong>
+					</div>
+				</aside>
+			</div>
+		</main>
+		<Footer />
+	</body>
+</html>
