@@ -5,9 +5,18 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 
-type Props = CollectionEntry<'blog'>['data'];
+type Heading = {
+	depth: number;
+	slug: string;
+	text: string;
+};
 
-const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
+type Props = CollectionEntry<'blog'>['data'] & {
+	headings?: Heading[];
+};
+
+const { title, description, pubDate, updatedDate, heroImage, headings = [] } = Astro.props;
+const tocHeadings = headings.filter((heading) => heading.depth >= 2 && heading.depth <= 4);
 ---
 
 <html lang="en">
@@ -15,9 +24,18 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 		<BaseHead title={title} description={description} />
 		<style>
 			main {
-				width: calc(100% - 2em);
-				max-width: 100%;
-				margin: 0;
+				width: min(75vw, 1320px);
+				max-width: calc(100% - 2rem);
+				margin: auto;
+			}
+			.post-shell {
+				display: grid;
+				grid-template-columns: minmax(0, 1fr) 300px;
+				gap: 2rem;
+				align-items: start;
+			}
+			.post-main {
+				min-width: 0;
 			}
 			.hero-image {
 				width: 100%;
@@ -29,11 +47,55 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 				box-shadow: var(--box-shadow);
 			}
 			.prose {
-				width: 720px;
-				max-width: calc(100% - 2em);
-				margin: auto;
+				width: min(75vw, 980px);
+				max-width: 100%;
+				margin: 0;
 				padding: 1em;
 				color: rgb(var(--gray-dark));
+			}
+			.toc {
+				position: sticky;
+				top: 1.5rem;
+				padding: 1.1rem;
+				border-radius: 18px;
+				border: 1px solid rgba(var(--gray), 0.18);
+				background: rgba(255, 255, 255, 0.82);
+				box-shadow: 0 16px 40px rgba(var(--black), 0.08);
+				backdrop-filter: blur(10px);
+			}
+			.toc h3 {
+				margin-bottom: 0.9rem;
+				font-size: 1rem;
+				letter-spacing: 0.06em;
+				text-transform: uppercase;
+			}
+			.toc ul {
+				list-style: none;
+				margin: 0;
+				padding: 0;
+				display: grid;
+				gap: 0.45rem;
+			}
+			.toc a {
+				display: block;
+				padding: 0.45rem 0.65rem;
+				border-radius: 12px;
+				color: rgb(var(--gray-dark));
+				text-decoration: none;
+				background: rgba(var(--gray-light), 0.55);
+				font-size: 0.94rem;
+			}
+			.toc a:hover {
+				color: rgb(var(--black));
+				background: rgba(var(--gray-light), 0.95);
+			}
+			.toc .depth-3 a {
+				padding-left: 1.2rem;
+				font-size: 0.88rem;
+			}
+			.toc .depth-4 a {
+				padding-left: 1.75rem;
+				font-size: 0.84rem;
 			}
 			.title {
 				margin-bottom: 1em;
@@ -51,34 +113,68 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 			.last-updated-on {
 				font-style: italic;
 			}
+			@media (max-width: 1080px) {
+				.post-shell {
+					grid-template-columns: 1fr;
+				}
+				.toc {
+					position: static;
+					order: -1;
+				}
+			}
+			@media (max-width: 720px) {
+				main {
+					width: min(100%, calc(100% - 1rem));
+				}
+				.prose {
+					width: 100%;
+					padding: 0;
+				}
+			}
 		</style>
 	</head>
 
 	<body>
 		<Header />
 		<main>
-			<article>
-				<div class="hero-image">
-					{heroImage && <img width={1020} height={510} src={heroImage} alt="" />}
-				</div>
-				<div class="prose">
-					<div class="title">
-						<div class="date">
-							<FormattedDate date={pubDate} />
-							{
-								updatedDate && (
-									<div class="last-updated-on">
-										Last updated on <FormattedDate date={updatedDate} />
-									</div>
-								)
-							}
-						</div>
-						<h1>{title}</h1>
-						<hr />
+			<div class="post-shell">
+				<article class="post-main">
+					<div class="hero-image">
+						{heroImage && <img width={1020} height={510} src={heroImage} alt="" />}
 					</div>
-					<slot />
-				</div>
-			</article>
+					<div class="prose">
+						<div class="title">
+							<div class="date">
+								<FormattedDate date={pubDate} />
+								{
+									updatedDate && (
+										<div class="last-updated-on">
+											Last updated on <FormattedDate date={updatedDate} />
+										</div>
+									)
+								}
+							</div>
+							<h1>{title}</h1>
+							<hr />
+						</div>
+						<slot />
+					</div>
+				</article>
+				{
+					tocHeadings.length > 0 && (
+						<aside class="toc">
+							<h3>On This Page</h3>
+							<ul>
+								{tocHeadings.map((heading) => (
+									<li class={`depth-${heading.depth}`}>
+										<a href={`#${heading.slug}`}>{heading.text}</a>
+									</li>
+								))}
+							</ul>
+						</aside>
+					)
+				}
+			</div>
 		</main>
 		<Footer />
 	</body>
