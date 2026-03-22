@@ -17,7 +17,7 @@ In this article, i will provide an overview of Redis.
   - set
   - sort set
 
-*I will explain all type of datas in detail below*
+*I will explain all type of datas in detail below*  
 All data stored in Redis will be saved in RAM, and this is why redis is capable of handling a millions of request per second. Beside, Redis allows to store in disk called Persistent redis *(optional)* when system have problems.
 
 ## Redis in production environment.
@@ -25,12 +25,15 @@ All data stored in Redis will be saved in RAM, and this is why redis is capable 
 1. Caching.
 
 Redis can be used as a cache layer. Cause highly perform in write and read, redis can share data store between applications, or temporary database. Redis can serve frequenly requested data with response of time less than a milisecond. You can also easily scale up to handle higher loads without need for costly infratrcuture upgrades. Session caching and web page caching such as images, file, metadata,... are common example of use cases with Redis.
+
 2. Counter.
 
 Redis have ability to rapid increment and decrement value while data stored in RAM, *set* and *sorted sets* are used to count a request into a website, or manage a leaderboard in game. Redis thread-safe, so it can be synchrnize data across multiple requests.
+
 3. Publish/subscribe (Pub/Sub).
 
 Redis can create channels to facilitate data between **Pub** and **Sub** like a channel in **Socket Cluster** or topic in **apache Kafka**. For instance, Pub and Sub are used to monitor and analyze connection in social networks or chat systems.
+
 4. Queues.
 
 Creating queues to process requests sequentially. Redis allows data storage in the form of lists, and provide many actions to interact with list, so redis can use like a message queues.
@@ -46,7 +49,7 @@ OK
 127.0.0.1:6379> get myname
 "TranPhanVinhSang"
 ```
-By using **GET** and **SET**, we can get any value of key and get value of key. You can explore common commands with string [Here](https://redis.io/docs/latest/commands//?group=string)
+By using **GET** and **SET**, we can get any value of key and get value of key. You can explore common commands with string [Here](https://redis.io/docs/latest/commands//?group=string)  
 <span class="text-red-500">Warning:</span> SET can be change any value of KEY already exist or not, so be careful. 
 
 2. LIST
@@ -80,7 +83,7 @@ You can explore common commands with LIST [Here](https://redis.io/docs/latest/co
 
 3. SET
 
-SET is an unordered collection of strings. Sets support operations for adding, reading, and deleting individual elements, as well as checking for the presence of an element within the set, all with a default time complexity of O(1)—regardless of the total number of elements in the set. Additionally, Redis supports set operations, including intersection, union, and difference. The maximum number of elements allowed in a single Set is 2<sub>32</sub> - 1 (4,294,967,295—more than 4 billion elements per set). Example:
+SET is an unordered collection of strings. Sets support operations for adding, reading, and deleting individual elements, as well as checking for the presence of an element within the set, all with a default time complexity of O(1)—regardless of the total number of elements in the set. Additionally, Redis supports set operations, including intersection, union, and difference. The maximum number of elements allowed in a single Set is 2<sup>32</sup> - 1 (4,294,967,295—more than 4 billion elements per set). Example:
 ```bash
 127.0.0.1:6379> sadd users user_1
 (integer) 1
@@ -103,7 +106,7 @@ You can explore common commands with SET [Here](https://redis.io/docs/latest/com
 
 4. HASHES
 
-HASG is a data type that stores a **hash table** of key-value pairs, where the keys are arranged randomly and do not follow any specific order. HASH is typically used to store objects (such as a user with fields like name, age, address, etc.). Each hash can store up to 2<sub>32</sub> - 1 key-value pairs. Redis supports operations for adding, reading, and deleting individual elements, as well as retrieving all values ​​within a hash.
+HASG is a data type that stores a **hash table** of key-value pairs, where the keys are arranged randomly and do not follow any specific order. HASH is typically used to store objects (such as a user with fields like name, age, address, etc.). Each hash can store up to 2<p>32</sup> - 1 key-value pairs. Redis supports operations for adding, reading, and deleting individual elements, as well as retrieving all values ​​within a hash.  
 ```bash
 127.0.0.1:6379> hmset user:1 name Sang email vinhsang7410@gmail.com age 23
 OK
@@ -144,35 +147,44 @@ ZSET is a collection of unique strings, where each element consists of a mapping
 You can explore common commands with SET [Here](https://redis.io/docs/latest/commands/?group=sorted_set)
 
 ## Persistent redis
-Beside stored key-vale on RAM, redis also have 2 background threads dedicated to periodically writing data to the hard disk.
+
+Beside stored key-vale on RAM, redis also have 2 background threads dedicated to periodically writing data to the hard disk.  
 There are 2 type of file wrtiten to disk:
   - RDB (Redis DataBase file)
   - AOF (Append Only File)
+
 ### RDB (Redis DataBase file)
+
 RDB create a snapshot of redis to save into disk after regular interval.
 
 #### Advantages
-RDB allows users to save different versions of the database, which is highly convenient in the event of a system failure.
-By storing data in a single static file, users can easily transfer that data to various data centers or servers.
-When restarting a server, using RDB to handle large datasets offers faster performance compared to using AOF.
+
+RDB allows users to save different versions of the database, which is highly convenient in the event of a system failure.  
+By storing data in a single static file, users can easily transfer that data to various data centers or servers.  
+When restarting a server, using RDB to handle large datasets offers faster performance compared to using AOF.  
 
 #### Disadvantages
-RDB is not an ideal choice if your primary goal is to minimize the risk of data loss.
-Typically, users configure the system to generate RDB snapshots every 5 minutes (or more frequently). Consequently, in the event of a system failure that renders Redis inoperable, any data generated during the final minutes leading up to the incident will be lost.
-RDB relies on the *fork()* system call to create a child process dedicated to handling disk I/O operations. If the dataset is exceptionally large, the *fork()* process can be time-consuming; during this interval—which may last anywhere from a few milliseconds to a full second, depending on the data volume and CPU performance—the server will be unable to respond to client requests.
+
+RDB is not an ideal choice if your primary goal is to minimize the risk of data loss.  
+Typically, users configure the system to generate RDB snapshots every 5 minutes (or more frequently). Consequently, in the event of a system failure that renders Redis inoperable, any data generated during the final minutes leading up to the incident will be lost.  
+RDB relies on the *fork()* system call to create a child process dedicated to handling disk I/O operations. If the dataset is exceptionally large, the *fork()* process can be time-consuming; during this interval—which may last anywhere from a few milliseconds to a full second, depending on the data volume and CPU performance—the server will be unable to respond to client requests.  
 
 ### AOF (Append Only File)
-AOF records all write operations received by the server; these operations are replayed when the server restarts or when the initial dataset is reconstructed.
+
+AOF records all write operations received by the server; these operations are replayed when the server restarts or when the initial dataset is reconstructed.  
 
 #### Advantages
-Using AOF helps ensure greater data durability compared to using RDB. Users can configure Redis to log either every command executed or once per second.
-Redis writes AOF logs by appending new entries to the end of the existing file; consequently, file-seeking operations are unnecessary. Furthermore, even if only a partial command is written to the log file—for instance, due to a full disk—Redis possesses built-in mechanisms to detect and repair such errors (via *redis-check-aof*).
-Redis also provides a background process that allows for the rewriting of the AOF file when it grows excessively large.
+
+Using AOF helps ensure greater data durability compared to using RDB. Users can configure Redis to log either every command executed or once per second. 
+Redis writes AOF logs by appending new entries to the end of the existing file; consequently, file-seeking operations are unnecessary. Furthermore, even if only a partial command is written to the log file—for instance, due to a full disk—Redis possesses built-in mechanisms to detect and repair such errors (via *redis-check-aof*).  
+Redis also provides a background process that allows for the rewriting of the AOF file when it grows excessively large.  
 
 #### Disadvantages
-AOF files are typically larger than RDB files for the same dataset.
+
+AOF files are typically larger than RDB files for the same dataset.  
 AOF can be slower than RDB, depending on how the disk persistence frequency is configured. However, if configured to log once per second, it can achieve performance comparable to RDB.
-Redis developers have occasionally encountered bugs with AOF (albeit very rarely), specifically instances where the AOF file failed to accurately reconstruct the dataset upon restarting Redis. This type of error has never been observed when working with RDB.
+Redis developers have occasionally encountered bugs with AOF (albeit very rarely), specifically instances where the AOF file failed to accurately reconstruct the dataset upon restarting Redis. This type of error has never been observed when working with RDB.  
 
 ## Conclution.
+
 Through this article, you can gain a better understanding of Redis—specifically how it is used and applied in production environments. We will also be covering a few labs related to Redis.
