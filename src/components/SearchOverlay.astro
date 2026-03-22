@@ -110,10 +110,10 @@ const baseUrl = import.meta.env.BASE_URL;
 
 			try {
 				const module = await import(`${baseUrl}pagefind/pagefind.js`);
-				pagefind = module.default;
+				pagefind = module.default ?? module;
 
 				if (typeof pagefind.options === "function") {
-					await pagefind.options({ bundlePath: `${baseUrl}pagefind/` });
+					await pagefind.options({ baseUrl });
 				}
 
 				if (typeof pagefind.init === "function") {
