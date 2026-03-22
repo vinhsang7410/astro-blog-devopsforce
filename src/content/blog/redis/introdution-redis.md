@@ -1,7 +1,7 @@
 ---
 title: "What is Redis and applications of Redis in Production Environment"
 description: "introducting redis"
-pubDate: "March 03 2026"
+pubDate: "March 23 2026"
 heroImage: "/Redis-Introduction.png"
 ---
 In this article, i will provide an overview of Redis.
