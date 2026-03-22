@@ -1,9 +1,10 @@
 ---
 import HeaderLink from './HeaderLink.astro';
+import SearchOverlay from './SearchOverlay.astro';
 import { SITE_TITLE } from '../consts';
 ---
 
-<header>
+<header data-pagefind-ignore="all">
 	<nav>
 		<h2><a href="/">{SITE_TITLE}</a></h2>
 		<div class="internal-links">
@@ -14,6 +15,7 @@ import { SITE_TITLE } from '../consts';
 			<HeaderLink href="/projects">Projects</HeaderLink>
 			<HeaderLink href="/about">About</HeaderLink>
 		</div>
+		<SearchOverlay />
 	</nav>
 </header>
 <style>
@@ -43,6 +45,7 @@ import { SITE_TITLE } from '../consts';
 		display: flex;
 		flex-wrap: wrap;
 		justify-content: center;
+		flex: 1;
 	}
 	nav a {
 		padding: 1em 0.5em;

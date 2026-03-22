@@ -24,7 +24,7 @@ const tocItems: TocItem[] = headings
 
 {
 	tocItems.length > 0 && (
-		<aside class="toc">
+		<aside class="toc" data-pagefind-ignore="all">
 			<h3>On This Page</h3>
 			<ul>
 				{tocItems.map((heading) => (

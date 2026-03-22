@@ -1,0 +1,503 @@
+---
+const baseUrl = import.meta.env.BASE_URL;
+---
+
+<div class="search-shell" data-search-overlay data-base-url={baseUrl} data-pagefind-ignore="all">
+	<button class="search-trigger" type="button" data-search-trigger aria-haspopup="dialog" aria-expanded="false">
+		<svg viewBox="0 0 24 24" aria-hidden="true">
+			<path
+				d="M10.5 4a6.5 6.5 0 1 0 4.03 11.6l4.44 4.44 1.06-1.06-4.44-4.44A6.5 6.5 0 0 0 10.5 4Zm0 1.5a5 5 0 1 1 0 10 5 5 0 0 1 0-10Z"
+				fill="currentColor"
+			/>
+		</svg>
+		<span>Search</span>
+	</button>
+
+	<div class="search-layer" data-search-layer hidden>
+		<button class="search-backdrop" type="button" data-search-close aria-label="Close search"></button>
+		<div class="search-panel" role="dialog" aria-modal="true" aria-label="Search the site">
+			<div class="search-panel-head">
+				<label class="search-input-wrap">
+					<svg viewBox="0 0 24 24" aria-hidden="true">
+						<path
+							d="M10.5 4a6.5 6.5 0 1 0 4.03 11.6l4.44 4.44 1.06-1.06-4.44-4.44A6.5 6.5 0 0 0 10.5 4Zm0 1.5a5 5 0 1 1 0 10 5 5 0 0 1 0-10Z"
+							fill="currentColor"
+						/>
+					</svg>
+					<input
+						type="search"
+						placeholder="Search posts, headings, notes, projects..."
+						autocomplete="off"
+						spellcheck="false"
+						data-search-input
+					/>
+				</label>
+				<button class="search-close" type="button" data-search-close>Close</button>
+			</div>
+			<div class="search-dropdown">
+				<p class="search-message" data-search-message>
+					Start typing to search across articles, notes, labs, and projects.
+				</p>
+				<ul class="search-results" data-search-results></ul>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script is:inline type="module">
+	const root = document.querySelector("[data-search-overlay]");
+
+	if (root) {
+		const trigger = root.querySelector("[data-search-trigger]");
+		const layer = root.querySelector("[data-search-layer]");
+		const panel = root.querySelector(".search-panel");
+		const input = root.querySelector("[data-search-input]");
+		const closeButtons = root.querySelectorAll("[data-search-close]");
+		const resultsList = root.querySelector("[data-search-results]");
+		const message = root.querySelector("[data-search-message]");
+		const baseUrl = root.getAttribute("data-base-url") || "/";
+
+		let pagefind = null;
+		let searchTimer = 0;
+		let activeToken = 0;
+		let previousFocus = null;
+
+		const normalizePath = (value) => value.replace(/\/+$/, "") || "/";
+		const currentPath = () => normalizePath(window.location.pathname);
+
+		const setMessage = (text, state = "idle") => {
+			message.textContent = text;
+			message.dataset.state = state;
+			message.hidden = false;
+			resultsList.innerHTML = "";
+		};
+
+		const closeSearch = () => {
+			root.dataset.open = "false";
+			trigger.setAttribute("aria-expanded", "false");
+			document.body.style.overflow = "";
+			window.clearTimeout(searchTimer);
+			activeToken += 1;
+			input.value = "";
+			resultsList.innerHTML = "";
+			message.hidden = false;
+			message.textContent = "Start typing to search across articles, notes, labs, and projects.";
+			window.setTimeout(() => {
+				if (root.dataset.open !== "true") layer.hidden = true;
+			}, 180);
+			if (previousFocus instanceof HTMLElement) previousFocus.focus();
+		};
+
+		const openSearch = async () => {
+			previousFocus = document.activeElement;
+			layer.hidden = false;
+			root.dataset.open = "true";
+			trigger.setAttribute("aria-expanded", "true");
+			document.body.style.overflow = "hidden";
+			setMessage("Start typing to search across articles, notes, labs, and projects.");
+			window.requestAnimationFrame(() => input.focus());
+			try {
+				await ensurePagefind();
+			} catch (error) {
+				console.error(error);
+			}
+		};
+
+		const ensurePagefind = async () => {
+			if (pagefind) return pagefind;
+
+			setMessage("Loading search index...", "loading");
+
+			try {
+				const module = await import(`${baseUrl}pagefind/pagefind.js`);
+				pagefind = module.default;
+
+				if (typeof pagefind.options === "function") {
+					await pagefind.options({ bundlePath: `${baseUrl}pagefind/` });
+				}
+
+				if (typeof pagefind.init === "function") {
+					await pagefind.init();
+				}
+
+				setMessage("Start typing to search across articles, notes, labs, and projects.");
+				return pagefind;
+			} catch (error) {
+				setMessage(
+					"Search index is unavailable right now. Install astro-pagefind and build the site once to generate it.",
+					"error",
+				);
+				throw error;
+			}
+		};
+
+		const escapeHtml = (value) =>
+			value
+				.replaceAll("&", "&amp;")
+				.replaceAll("<", "&lt;")
+				.replaceAll(">", "&gt;")
+				.replaceAll('"', "&quot;")
+				.replaceAll("'", "&#39;");
+
+		const flattenResults = (dataResults) => {
+			const items = [];
+			const seen = new Set();
+
+			for (const data of dataResults) {
+				const pageTitle = data.meta?.title || data.url;
+				const candidates =
+					Array.isArray(data.sub_results) && data.sub_results.length > 0
+						? data.sub_results
+						: [{ url: data.url, title: pageTitle, excerpt: data.excerpt }];
+
+				for (const candidate of candidates) {
+					if (!candidate?.url || seen.has(candidate.url)) continue;
+					seen.add(candidate.url);
+					items.push({
+						url: candidate.url,
+						title: candidate.title || pageTitle,
+						pageTitle,
+						excerpt: candidate.excerpt || data.excerpt || "",
+					});
+					if (items.length >= 10) return items;
+				}
+			}
+
+			return items;
+		};
+
+		const renderResults = (items) => {
+			resultsList.innerHTML = "";
+
+			if (items.length === 0) {
+				setMessage("No matching results found. Try a different keyword.", "empty");
+				return;
+			}
+
+			message.hidden = true;
+
+			for (const item of items) {
+				const li = document.createElement("li");
+				const anchor = document.createElement("a");
+				const targetUrl = new URL(item.url, window.location.origin);
+				const isCurrentPage = normalizePath(targetUrl.pathname) === currentPath();
+				const pageLabel =
+					item.title === item.pageTitle
+						? isCurrentPage
+							? "Current page"
+							: targetUrl.pathname
+						: item.pageTitle;
+
+				anchor.className = "search-result";
+				anchor.href = item.url;
+				anchor.innerHTML = `
+					<div class="search-result-top">
+						<span class="search-result-title">${escapeHtml(item.title)}</span>
+						<span class="search-result-page">${escapeHtml(pageLabel)}</span>
+					</div>
+					${item.excerpt ? `<p class="search-result-excerpt">${item.excerpt}</p>` : ""}
+				`;
+
+				anchor.addEventListener("click", (event) => {
+					const destination = new URL(anchor.href, window.location.origin);
+					const samePage = normalizePath(destination.pathname) === currentPath();
+
+					if (!samePage) {
+						closeSearch();
+						window.location.href = anchor.href;
+						return;
+					}
+
+					event.preventDefault();
+					closeSearch();
+
+					const hash = destination.hash.replace(/^#/, "");
+					if (!hash) {
+						window.scrollTo({ top: 0, behavior: "smooth" });
+						return;
+					}
+
+					const target = document.getElementById(decodeURIComponent(hash));
+					if (target) {
+						window.history.replaceState(null, "", destination.hash);
+						target.scrollIntoView({ behavior: "smooth", block: "start" });
+					}
+				});
+
+				li.append(anchor);
+				resultsList.append(li);
+			}
+		};
+
+		const runSearch = async (query, token) => {
+			if (!query) {
+				setMessage("Start typing to search across articles, notes, labs, and projects.");
+				return;
+			}
+
+			setMessage(`Searching for "${query}"...`, "loading");
+
+			try {
+				const pf = await ensurePagefind();
+				const searchResponse = await pf.search(query);
+
+				if (token !== activeToken) return;
+
+				const rawResults = searchResponse?.results ?? [];
+				const hydrated = await Promise.all(rawResults.slice(0, 6).map((entry) => entry.data()));
+
+				if (token !== activeToken) return;
+
+				renderResults(flattenResults(hydrated));
+			} catch (error) {
+				if (token !== activeToken) return;
+				console.error(error);
+			}
+		};
+
+		trigger.addEventListener("click", () => {
+			if (root.dataset.open === "true") {
+				closeSearch();
+			} else {
+				openSearch();
+			}
+		});
+
+		closeButtons.forEach((button) => button.addEventListener("click", closeSearch));
+
+		document.addEventListener("keydown", (event) => {
+			if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+				event.preventDefault();
+				if (root.dataset.open === "true") {
+					closeSearch();
+				} else {
+					openSearch();
+				}
+			}
+
+			if (event.key === "Escape" && root.dataset.open === "true") {
+				closeSearch();
+			}
+		});
+
+		input.addEventListener("input", () => {
+			const query = input.value.trim();
+			activeToken += 1;
+			const token = activeToken;
+			window.clearTimeout(searchTimer);
+			searchTimer = window.setTimeout(() => runSearch(query, token), 180);
+		});
+
+		layer.addEventListener("click", (event) => {
+			if (event.target === layer) closeSearch();
+		});
+
+		panel.addEventListener("click", (event) => event.stopPropagation());
+	}
+</script>
+
+<style is:global>
+	.search-shell {
+		margin-left: auto;
+		position: relative;
+		z-index: 20;
+	}
+	.search-trigger {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.55rem;
+		min-width: 8.5rem;
+		height: 3.15rem;
+		padding: 0 1rem;
+		border: 1px solid rgba(var(--gray), 0.18);
+		border-radius: 20px;
+		background: rgba(255, 255, 255, 0.92);
+		box-shadow: 0 14px 36px rgba(var(--black), 0.08);
+		color: rgb(var(--black));
+		font: inherit;
+		font-size: 0.95rem;
+		font-weight: 700;
+		cursor: pointer;
+		transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+	}
+	.search-trigger:hover {
+		transform: translateY(-1px);
+		border-color: rgba(var(--accent), 0.28);
+		box-shadow: 0 20px 44px rgba(var(--black), 0.12);
+	}
+	.search-trigger svg {
+		width: 1.1rem;
+		height: 1.1rem;
+	}
+	.search-layer {
+		position: fixed;
+		inset: 0;
+		display: grid;
+		place-items: start center;
+		padding: 4.5rem 1rem 1rem;
+		background: rgba(var(--black), 0.04);
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity 0.2s ease, background-color 0.2s ease;
+	}
+	.search-shell[data-open="true"] .search-layer {
+		opacity: 1;
+		pointer-events: auto;
+		background: rgba(var(--black), 0.58);
+	}
+	.search-backdrop {
+		position: absolute;
+		inset: 0;
+		border: 0;
+		padding: 0;
+		background: transparent;
+		cursor: default;
+	}
+	.search-panel {
+		position: relative;
+		width: 9.5rem;
+		min-height: 3.4rem;
+		border-radius: 22px;
+		border: 1px solid rgba(var(--gray), 0.16);
+		background: rgba(255, 255, 255, 0.97);
+		box-shadow: 0 30px 80px rgba(var(--black), 0.22);
+		backdrop-filter: blur(16px);
+		overflow: hidden;
+		transform: translateY(-1.2rem) scale(0.94);
+		transform-origin: top center;
+		transition:
+			width 0.26s ease,
+			min-height 0.26s ease,
+			border-radius 0.26s ease,
+			transform 0.26s ease;
+	}
+	.search-shell[data-open="true"] .search-panel {
+		width: min(860px, calc(100vw - 2rem));
+		min-height: min(70vh, 700px);
+		border-radius: 30px;
+		transform: translateY(0) scale(1);
+	}
+	.search-panel-head {
+		display: flex;
+		align-items: center;
+		gap: 0.9rem;
+		padding: 1.1rem 1.1rem 0.9rem;
+		border-bottom: 1px solid rgba(var(--gray), 0.12);
+	}
+	.search-input-wrap {
+		flex: 1;
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 0.9rem 1rem;
+		border-radius: 18px;
+		background: rgba(var(--gray-light), 0.38);
+		border: 1px solid rgba(var(--gray), 0.1);
+	}
+	.search-input-wrap svg {
+		width: 1.2rem;
+		height: 1.2rem;
+		color: rgb(var(--gray));
+	}
+	.search-input-wrap input {
+		width: 100%;
+		border: 0;
+		padding: 0;
+		background: transparent;
+		color: rgb(var(--black));
+		font: inherit;
+		font-size: 1.05rem;
+		outline: none;
+	}
+	.search-close {
+		border: 0;
+		padding: 0.8rem 1rem;
+		border-radius: 16px;
+		background: rgba(var(--gray-light), 0.72);
+		color: rgb(var(--black));
+		font: inherit;
+		font-weight: 700;
+		cursor: pointer;
+	}
+	.search-dropdown {
+		padding: 0.85rem 1rem 1rem;
+		max-height: calc(min(70vh, 700px) - 5.5rem);
+		overflow: auto;
+	}
+	.search-message {
+		margin: 0;
+		padding: 0.8rem 0.5rem;
+		color: rgb(var(--gray-dark));
+	}
+	.search-message[data-state="error"] {
+		color: #9f1d28;
+	}
+	.search-results {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: grid;
+		gap: 0.8rem;
+	}
+	.search-result {
+		display: block;
+		padding: 1rem;
+		border-radius: 20px;
+		background: rgba(var(--gray-light), 0.28);
+		border: 1px solid rgba(var(--gray), 0.12);
+		text-decoration: none;
+		color: rgb(var(--gray-dark));
+		transition: transform 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+	}
+	.search-result:hover {
+		transform: translateY(-2px);
+		border-color: rgba(var(--accent), 0.28);
+		background: rgba(var(--gray-light), 0.5);
+	}
+	.search-result-top {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		gap: 0.75rem;
+		margin-bottom: 0.45rem;
+	}
+	.search-result-title {
+		color: rgb(var(--black));
+		font-weight: 700;
+	}
+	.search-result-page {
+		font-size: 0.82rem;
+		color: rgb(var(--gray));
+	}
+	.search-result-excerpt {
+		margin: 0;
+		font-size: 0.95rem;
+		line-height: 1.55;
+	}
+	.search-result-excerpt mark {
+		padding: 0 0.18rem;
+		border-radius: 0.2rem;
+		background: rgba(255, 221, 87, 0.7);
+	}
+	@media (max-width: 900px) {
+		.search-shell {
+			margin-left: 0;
+		}
+	}
+	@media (max-width: 720px) {
+		.search-shell {
+			width: 100%;
+		}
+		.search-trigger {
+			width: 100%;
+		}
+		.search-panel-head {
+			flex-direction: column;
+			align-items: stretch;
+		}
+		.search-close {
+			width: 100%;
+		}
+	}
+</style>
