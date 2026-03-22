@@ -50,7 +50,7 @@ OK
 "TranPhanVinhSang"
 ```
 By using **GET** and **SET**, we can get any value of key and get value of key. You can explore common commands with string [Here](https://redis.io/docs/latest/commands//?group=string)  
-<span class="text-red-500">Warning:</span> SET can be change any value of KEY already exist or not, so be careful. 
+<span style="color:red; font-weight:bold;">Warning:</span> SET can overwrite the value of a key whether it already exists or not, so be careful.  
 
 2. LIST
 
