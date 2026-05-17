@@ -2,6 +2,7 @@
 title: "How to Deploy Redis with Docker"
 description: "A practical guide to deploying Redis with Docker, Docker Compose, replication, Sentinel, and Redis Cluster."
 pubDate: 2026-05-17
+heroImage: /redis-docker-official-image-900px.avif
 ---
 
 # How to Deploy Redis with Docker
