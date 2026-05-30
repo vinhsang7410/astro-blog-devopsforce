@@ -202,4 +202,4 @@ dist
 .astro/
 
 **/prompt-*.txt
-.\src\content\blog\using-mdx.mdx
+./src/content/blog/using-mdx.mdx
