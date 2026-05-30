@@ -2,7 +2,7 @@
 title: "What is Apache Druid and its Applications in Production"
 description: "An introduction to Apache Druid, a high-performance real-time analytics database."
 pubDate: "March 28 2026"
-heroImage: "/apache-druid.png"
+heroImage: "/Apache_Druid_logo.svg.png"
 ---
 
 In this article, I will introduce and provide an overview of Apache Druid, giving you a comprehensive look at how it works and evaluating the benefits it can bring to your data jobs.
