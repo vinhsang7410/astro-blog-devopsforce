@@ -53,7 +53,7 @@ DOCKER_BUILDKIT=1 docker build -t apache/druid:<your_tag> -f distribution/docker
 
 I will use `my-tag` as the tag for this example.
 
-!Build Druid
+![Build Druid](/build-druid.png)
 
 After the build is complete, we need to modify the `distribution/docker/docker-compose.yml` file. Make the following changes:
 - Change the image from `apache/druid:37.0.0` (or the current default) to `image: apache/druid:my-tag`.
@@ -71,15 +71,15 @@ Once the modifications are done, you can run the following command to start the 
 docker compose -f distribution/docker/docker-compose.yml up -d
 ```
 
-!Docker Compose Up Druid
+![Docker Compose Up Druid](/docker-compose-up-druid.png)
 
 After a successful deployment, you can access the Druid console by navigating to: `http://<your_ip_address>:8888/`
 
-!Apache Druid Dashboard
+![Apache Druid Dashboard](/apache-druid-dashboard.png)
 
 From here, you can check the services running in your cluster:
 
-!Apache Druid Services
+![Apache Druid Services](/apache-druid-services.png)
 
 Let's list the main components visible on the dashboard:
 - **Load data:** This is where you configure where Druid will pull data from, how to parse the data, and configure data storage.
