@@ -34,6 +34,9 @@ const pageDescription = description ?? theme.description;
 				display: grid;
 				gap: 2rem;
 			}
+			.entry-shell > * {
+				min-width: 0;
+			}
 			.entry-hero {
 				position: relative;
 				overflow: hidden;
@@ -151,6 +154,7 @@ const pageDescription = description ?? theme.description;
 				font-weight: 700;
 			}
 			.entry-body {
+				min-width: 0;
 				padding: 2rem;
 				border-radius: 28px;
 				background: rgba(255, 255, 255, 0.92);
@@ -160,6 +164,7 @@ const pageDescription = description ?? theme.description;
 			.prose {
 				width: min(760px, 100%);
 				max-width: 100%;
+				min-width: 0;
 				margin: 0 auto;
 				padding: 0;
 			}
@@ -168,6 +173,8 @@ const pageDescription = description ?? theme.description;
 				margin-top: 2.2rem;
 			}
 			.prose :global(pre) {
+				max-width: 100%;
+				overflow-x: auto;
 				background: rgb(var(--black));
 				color: white;
 				box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
